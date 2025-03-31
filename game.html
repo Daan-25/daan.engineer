@@ -78,8 +78,8 @@
 
     function drawPaddles() {
         ctx.beginPath();
-        ctx.rect(0, paddle1Y, paddleWidth, paddleHeight);  // Player paddle
-        ctx.rect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight);  // Computer paddle
+        ctx.rect(0, paddle1Y, paddleWidth, paddleHeight);
+        ctx.rect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight);
         ctx.fillStyle = "#fff";
         ctx.fill();
         ctx.closePath();
@@ -93,31 +93,34 @@
         ctx.closePath();
     }
 
-    function moveBall() {
-        x += dx;
-        y += dy;
+    let computerSpeed = 3;
+let computerMistakeChance = 0.05;
 
-        if (y + dy < ballRadius || y + dy > canvas.height - ballRadius) {
-            dy = -dy;
-        }
+function movePaddles() {
+    if (upPressed && paddle1Y > 0) {
+        paddle1Y -= paddleSpeed;
+    }
+    if (downPressed && paddle1Y < canvas.height - paddleHeight) {
+        paddle1Y += paddleSpeed;
+    }
 
-        if (x + dx < paddleWidth) {
-            if (y > paddle1Y && y < paddle1Y + paddleHeight) {
-                dx = -dx;
-            } else {
-                computerScore++;
-                resetBall();
-            }
+    if (Math.random() < computerMistakeChance) {
+        if (Math.random() > 0.5) {
+            paddle2Y += computerSpeed;
+        } else {
+            paddle2Y -= computerSpeed;
         }
-        if (x + dx > canvas.width - paddleWidth) {
-            if (y > paddle2Y && y < paddle2Y + paddleHeight) {
-                dx = -dx;
-            } else {
-                playerScore++;
-                resetBall();
-            }
+    } else {
+        if (y < paddle2Y + paddleHeight / 2) {
+            paddle2Y -= computerSpeed;
+        } else if (y > paddle2Y + paddleHeight / 2) {
+            paddle2Y += computerSpeed;
         }
     }
+
+    if (paddle2Y < 0) paddle2Y = 0;
+    if (paddle2Y > canvas.height - paddleHeight) paddle2Y = canvas.height - paddleHeight;
+}
 
 function movePaddles() {
     if (upPressed && paddle1Y > 0) {
