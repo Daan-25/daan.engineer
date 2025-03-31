@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hand Tracking Web App</title>
+    <title>Pose Estimation Web App</title>
     <style>
         #webcam {
             display: block;
@@ -25,8 +25,8 @@
         }
     </style>
 
-    <!-- Voeg hier de MediaPipe Hands script tag toe -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.3"></script>
+    <!-- Voeg hier de MediaPipe Pose script tag toe -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.3"></script>
 </head>
 <body>
     <video id="webcam" autoplay></video>
@@ -45,44 +45,53 @@
                 console.error('Webcam not accessible', error);
             });
 
-        // Set up MediaPipe Hands for hand tracking
-        const hands = new Hands();
-        hands.setOptions({
-            maxNumHands: 1,
-            modelComplexity: 1,
-            minDetectionConfidence: 0.7,
-            minTrackingConfidence: 0.7,
+        // Set up MediaPipe Pose for pose estimation
+        const pose = new Pose();
+        pose.setOptions({
+            modelComplexity: 1,  // Simpler model, faster
+            minDetectionConfidence: 0.5, // Confidence for detecting the body
+            minTrackingConfidence: 0.5,  // Confidence for tracking the body
         });
 
-        hands.onResults((results) => {
-            if (results.multiHandLandmarks) {
-                results.multiHandLandmarks.forEach((landmarks) => {
-                    const x = landmarks[8].x * webcam.width;  // x position of the index finger tip
-                    const y = landmarks[8].y * webcam.height; // y position of the index finger tip
+        pose.onResults((results) => {
+            // Check if pose landmarks are detected
+            if (results.poseLandmarks) {
+                const canvas = webcam.getContext('2d');
+                canvas.clearRect(0, 0, webcam.width, webcam.height);
 
-                    // Draw a blue circle (representing the fingertip) on the webcam video
-                    const ctx = webcam.getContext('2d');
-                    ctx.beginPath();
-                    ctx.arc(x, y, 10, 0, 2 * Math.PI);
-                    ctx.fillStyle = 'blue';
-                    ctx.fill();
+                // Draw the pose landmarks on the webcam feed
+                results.poseLandmarks.forEach((landmark) => {
+                    const x = landmark.x * webcam.width;  // x position
+                    const y = landmark.y * webcam.height; // y position
 
-                    // Check if the index finger is over the button
-                    const button = document.getElementById('button');
-                    if (x > button.offsetLeft && x < button.offsetLeft + button.offsetWidth &&
-                        y > button.offsetTop && y < button.offsetTop + button.offsetHeight) {
-                        button.style.backgroundColor = 'red';
-                    } else {
-                        button.style.backgroundColor = 'green';
-                    }
+                    // Draw a circle at each landmark
+                    canvas.beginPath();
+                    canvas.arc(x, y, 5, 0, 2 * Math.PI);
+                    canvas.fillStyle = 'blue';
+                    canvas.fill();
                 });
+
+                // Optionally, draw lines connecting the landmarks
+                for (let i = 0; i < results.poseLandmarks.length - 1; i++) {
+                    const x1 = results.poseLandmarks[i].x * webcam.width;
+                    const y1 = results.poseLandmarks[i].y * webcam.height;
+                    const x2 = results.poseLandmarks[i + 1].x * webcam.width;
+                    const y2 = results.poseLandmarks[i + 1].y * webcam.height;
+
+                    canvas.beginPath();
+                    canvas.moveTo(x1, y1);
+                    canvas.lineTo(x2, y2);
+                    canvas.strokeStyle = 'green';
+                    canvas.lineWidth = 2;
+                    canvas.stroke();
+                }
             }
         });
 
-        // Start the hand tracking
+        // Start the pose estimation
         const camera = new Camera(webcam, {
             onFrame: async () => {
-                await hands.send({ image: webcam });
+                await pose.send({ image: webcam });
             },
             width: 640,
             height: 480
