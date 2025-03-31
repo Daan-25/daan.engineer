@@ -51,7 +51,7 @@
                 });
 
             // Set up MediaPipe Pose for pose estimation
-            const pose = new Pose.Pose();  // Corrected initialization
+            const pose = new window.pose.Pose();  // Corrected initialization
             pose.setOptions({
                 modelComplexity: 1,
                 minDetectionConfidence: 0.5,
@@ -83,7 +83,7 @@
             });
 
             // Start the camera and send frames to MediaPipe for processing
-            const camera = new Camera.Camera(webcam, {
+            const camera = new window.camera.Camera(webcam, {
                 onFrame: async () => {
                     await pose.send({ image: webcam });
                 },
