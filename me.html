@@ -39,19 +39,22 @@
         function goFullscreen() {
             let video = document.getElementById("video");
             video.volume = 1.0;
-            video.playbackRate = 2.0;
+            video.playbackRate = 2.0; // Versnel de video
             video.style.display = "block";
-            video.play();
 
-            if (video.requestFullscreen) {
-                video.requestFullscreen();
-            } else if (video.mozRequestFullScreen) {
-                video.mozRequestFullScreen();
-            } else if (video.webkitRequestFullscreen) {
-                video.webkitRequestFullscreen();
-            } else if (video.msRequestFullscreen) {
-                video.msRequestFullscreen();
-            }
+            video.play().then(() => {
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.mozRequestFullScreen) {
+                    video.mozRequestFullScreen();
+                } else if (video.webkitRequestFullscreen) {
+                    video.webkitRequestFullscreen();
+                } else if (video.msRequestFullscreen) {
+                    video.msRequestFullscreen();
+                }
+            }).catch(error => {
+                console.error("Autoplay geblokkeerd: ", error);
+            });
         }
 
         document.getElementById("startButton").addEventListener("click", function() {
