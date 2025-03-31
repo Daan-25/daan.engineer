@@ -3,54 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fullscreen Video</title>
+    <title>About me</title>
     <style>
         body {
             margin: 0;
             background-color: black;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            text-align: center;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #startButton {
+            padding: 10px 20px;
+            font-size: 20px;
+            cursor: pointer;
         }
         video {
             width: 100%;
-            height: 100%;
-            object-fit: cover; /* Zorgt ervoor dat de video het scherm vult */
+            height: auto;
+            display: none;
         }
     </style>
 </head>
 <body>
 
-    <video id="video" loop autoplay>
-        <source src="video.mp4" type="video/mp4">
-        Je browser ondersteunt geen video-elementen.
+    <h1>Welcome!</h1>
+    <p>Click the button.</p>
+    <button id="startButton">Click</button>
+
+    <video id="video" controls>
+        <source src="/illegal/Ronaldo suiii.mp4" type="video/mp4">
+        Your browser doesn't support this.
     </video>
 
     <script>
-        let video = document.getElementById("video");
+        function goFullscreen() {
+            let video = document.getElementById("video");
+            video.volume = 1.0;
+            video.style.display = "block";
+            video.play();
 
-        function makeFullscreen() {
             if (video.requestFullscreen) {
                 video.requestFullscreen();
-            } else if (video.mozRequestFullScreen) { // Firefox
+            } else if (video.mozRequestFullScreen) {
                 video.mozRequestFullScreen();
-            } else if (video.webkitRequestFullscreen) { // Chrome, Safari & Edge
+            } else if (video.webkitRequestFullscreen) {
                 video.webkitRequestFullscreen();
-            } else if (video.msRequestFullscreen) { // IE/Edge
+            } else if (video.msRequestFullscreen) {
                 video.msRequestFullscreen();
             }
-
-            video.playbackRate = 2.0; // Versnel de video
-            video.volume = 1.0; // Zet volume op 100%
-            video.play(); // Start de video
-
-            // Verwijder de eventlistener na de eerste klik
-            document.removeEventListener("click", makeFullscreen);
         }
 
-        // Wacht op een klik van de gebruiker om fullscreen te activeren
-        document.addEventListener("click", makeFullscreen);
+        document.getElementById("startButton").addEventListener("click", function() {
+            goFullscreen();
+        });
     </script>
 
 </body>
