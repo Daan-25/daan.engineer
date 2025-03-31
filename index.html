@@ -60,6 +60,13 @@
                     const x = landmarks[8].x * webcam.width;  // x position of the index finger tip
                     const y = landmarks[8].y * webcam.height; // y position of the index finger tip
 
+                    // Draw a blue circle (representing the fingertip) on the webcam video
+                    const ctx = webcam.getContext('2d');
+                    ctx.beginPath();
+                    ctx.arc(x, y, 10, 0, 2 * Math.PI);
+                    ctx.fillStyle = 'blue';
+                    ctx.fill();
+
                     // Check if the index finger is over the button
                     const button = document.getElementById('button');
                     if (x > button.offsetLeft && x < button.offsetLeft + button.offsetWidth &&
