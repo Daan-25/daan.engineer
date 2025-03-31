@@ -1,98 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pose Estimation Web App</title>
-    <style>
-        #webcam {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
-        #canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 1;
-            pointer-events: none;
-        }
-    </style>
-</head>
+<!-- Copyright 2023 The MediaPipe Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. -->
+<link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+</script>
+
 <body>
-    <video id="webcam" autoplay></video>
-    <canvas id="canvas"></canvas>
+  <h1>Pose detection using the MediaPipe PoseLandmarker task</h1>
 
-    <!-- Load MediaPipe Pose -->
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils"></script>
-    
-    <script>
-        // Wait for MediaPipe to load
-        window.onload = () => {
-            // Get the video and canvas elements
-            const webcam = document.getElementById('webcam');
-            const canvasElement = document.getElementById('canvas');
-            const canvas = canvasElement.getContext('2d');
+  <section id="demos" class="invisible">
+    <h2>Demo: Detecting Images</h2>
+    <p><b>Click on an image below</b> to see the key landmarks of the body.</p>
 
-            // Set the size of the webcam and canvas
-            webcam.width = 640;
-            webcam.height = 480;
-            canvasElement.width = 640;
-            canvasElement.height = 480;
+    <div class="detectOnClick">
+      <!-- source: https://pixabay.com/photos/woman-asia-beautiful-cambodia-1822514/ -->
+      <img src="https://assets.codepen.io/9177687/woman-ge0f199f92_640.jpg" width="100%" crossorigin="anonymous" title="Click to get detection!" />
+    </div>
+    <div class="detectOnClick">
+      <!-- source: https://pixabay.com/photos/woman-relaxation-portrait-3053489/ -->
+      <img src="https://assets.codepen.io/9177687/woman-g1af8d3deb_640.jpg" width="100%" crossorigin="anonymous" title="Click to get detection!" />
+    </div>
 
-            // Set up the webcam stream
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then((stream) => {
-                    webcam.srcObject = stream;
-                })
-                .catch((error) => {
-                    console.error('Webcam niet toegankelijk', error);
-                });
+    <h2>Demo: Webcam continuous pose landmarks detection</h2>
+    <p>Stand in front of your webcam to get real-time pose landmarker detection.</br>Click <b>enable webcam</b> below and grant access to the webcam if prompted.</p>
 
-            // Set up MediaPipe Pose for pose estimation
-            const pose = new window.pose.Pose();  // Corrected initialization
-            pose.setOptions({
-                modelComplexity: 1,
-                minDetectionConfidence: 0.5,
-                minTrackingConfidence: 0.5,
-            });
-
-            // Define what happens when results are available
-            pose.onResults((results) => {
-                if (results.poseLandmarks) {
-                    console.log('Pose Landmarks:', results.poseLandmarks);
-
-                    // Clear the canvas before drawing new landmarks
-                    canvas.clearRect(0, 0, canvasElement.width, canvasElement.height);
-
-                    // Draw landmarks on the canvas
-                    results.poseLandmarks.forEach((landmark) => {
-                        const x = landmark.x * canvasElement.width;
-                        const y = landmark.y * canvasElement.height;
-
-                        // Draw a blue circle at each landmark position
-                        canvas.beginPath();
-                        canvas.arc(x, y, 5, 0, 2 * Math.PI);
-                        canvas.fillStyle = 'blue';
-                        canvas.fill();
-                    });
-                } else {
-                    console.log('Geen pose-landmarks gevonden.');
-                }
-            });
-
-            // Start the camera and send frames to MediaPipe for processing
-            const camera = new window.camera.Camera(webcam, {
-                onFrame: async () => {
-                    await pose.send({ image: webcam });
-                },
-                width: 640,
-                height: 480
-            });
-
-            camera.start();
-        };
-    </script>
-</body>
-</html>
+    <div id="liveView" class="videoView">
+      <button id="webcamButton" class="mdc-button mdc-button--raised">
+        <span class="mdc-button__ripple"></span>
+        <span class="mdc-button__label">ENABLE WEBCAM</span>
+      </button>
+      <div style="position: relative;">
+        <video id="webcam" style="width: 1280px; height: 720px; position: abso" autoplay playsinline></video>
+        <canvas class="output_canvas" id="output_canvas" width="1280" height="720" style="position: absolute; left: 0px; top: 0px;"></canvas>
+      </div>
+    </div>
+  </section>
