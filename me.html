@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fullscreen Video</title>
+    <title>About me</title>
     <style>
         body {
             margin: 0;
@@ -20,35 +20,35 @@
         video {
             width: 100%;
             height: auto;
-            display: none; /* Verberg de video tot hij wordt afgespeeld */
+            display: none;
         }
     </style>
 </head>
 <body>
 
     <h1>Welkom!</h1>
-    <p>Klik op de knop om fullscreen te gaan en de video te starten.</p>
-    <button id="startButton">Start</button>
+    <p>Click the button.</p>
+    <button id="startButton">Click</button>
 
     <video id="video" controls>
         <source src="/illegal/Ronaldo suiii.mp4" type="video/mp4">
-        Je browser ondersteunt geen video-elementen.
+        Your browser doesn't support this.
     </video>
 
     <script>
         function goFullscreen() {
             let video = document.getElementById("video");
-            video.volume = 1.0; // Zet het volume op 100%
-            video.style.display = "block"; // Maak de video zichtbaar
-            video.play(); // Start de video
+            video.volume = 1.0;
+            video.style.display = "block";
+            video.play();
 
             if (video.requestFullscreen) {
                 video.requestFullscreen();
-            } else if (video.mozRequestFullScreen) { // Firefox
+            } else if (video.mozRequestFullScreen) {
                 video.mozRequestFullScreen();
-            } else if (video.webkitRequestFullscreen) { // Chrome, Safari & Edge
+            } else if (video.webkitRequestFullscreen) {
                 video.webkitRequestFullscreen();
-            } else if (video.msRequestFullscreen) { // IE/Edge
+            } else if (video.msRequestFullscreen) {
                 video.msRequestFullscreen();
             }
         }
