@@ -3,13 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediaPipe Pose Test</title>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.3"></script>
+    <title>Pose Estimation Web App</title>
+    <style>
+        #webcam {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body>
     <video id="webcam" autoplay></video>
+    <canvas id="canvas"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils"></script>
+    
     <script>
         const webcam = document.getElementById('webcam');
+        const canvasElement = document.getElementById('canvas');
+        const canvas = canvasElement.getContext('2d');
+
+        // Set the size of the webcam and canvas
+        webcam.width = 640;
+        webcam.height = 480;
+        canvasElement.width = 640;
+        canvasElement.height = 480;
+
+        // Set up the webcam stream
         navigator.mediaDevices.getUserMedia({ video: true })
             .then((stream) => {
                 webcam.srcObject = stream;
@@ -18,26 +46,45 @@
                 console.error('Webcam niet toegankelijk', error);
             });
 
-        const pose = new Pose();
+        // Set up MediaPipe Pose for pose estimation
+        const pose = new Pose.Pose();
         pose.setOptions({
             modelComplexity: 1,
             minDetectionConfidence: 0.5,
             minTrackingConfidence: 0.5,
         });
 
+        // Define what happens when results are available
         pose.onResults((results) => {
             if (results.poseLandmarks) {
-                console.log(results.poseLandmarks); // Kijkt of je landmarks kunt krijgen
+                console.log('Pose Landmarks:', results.poseLandmarks);
+
+                // Clear the canvas before drawing new landmarks
+                canvas.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+                // Draw landmarks on the canvas
+                results.poseLandmarks.forEach((landmark) => {
+                    const x = landmark.x * canvasElement.width;
+                    const y = landmark.y * canvasElement.height;
+
+                    // Draw a blue circle at each landmark position
+                    canvas.beginPath();
+                    canvas.arc(x, y, 5, 0, 2 * Math.PI);
+                    canvas.fillStyle = 'blue';
+                    canvas.fill();
+                });
             }
         });
 
-        const camera = new Camera(webcam, {
+        // Start the camera and send frames to MediaPipe for processing
+        const camera = new Camera.Camera(webcam, {
             onFrame: async () => {
                 await pose.send({ image: webcam });
             },
             width: 640,
             height: 480
         });
+
         camera.start();
     </script>
 </body>
