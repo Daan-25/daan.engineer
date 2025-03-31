@@ -47,7 +47,7 @@
             });
 
         // Set up MediaPipe Pose for pose estimation
-        const pose = new window.pose.Pose(); // Dit is de juiste manier om de Pose class te initialiseren
+        const pose = new Pose.Pose();  // Corrected initialization
         pose.setOptions({
             modelComplexity: 1,
             minDetectionConfidence: 0.5,
