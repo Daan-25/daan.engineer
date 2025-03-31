@@ -119,20 +119,25 @@
         }
     }
 
-    function movePaddles() {
-        if (upPressed && paddle1Y > 0) {
-            paddle1Y -= paddleSpeed;
-        }
-        if (downPressed && paddle1Y < canvas.height - paddleHeight) {
-            paddle1Y += paddleSpeed;
-        }
-
-        if (y < paddle2Y + paddleHeight / 2) {
-            paddle2Y -= paddleSpeed;
-        } else if (y > paddle2Y + paddleHeight / 2) {
-            paddle2Y += paddleSpeed;
-        }
+function movePaddles() {
+    if (upPressed && paddle1Y > 0) {
+        paddle1Y -= paddleSpeed;
     }
+    if (downPressed && paddle1Y < canvas.height - paddleHeight) {
+        paddle1Y += paddleSpeed;
+    }
+
+    let randomOffset = Math.random() * 4 - 2;
+
+    if (y < paddle2Y + paddleHeight / 2 + randomOffset) {
+        paddle2Y -= paddleSpeed;
+    } else if (y > paddle2Y + paddleHeight / 2 + randomOffset) {
+        paddle2Y += paddleSpeed;
+    }
+
+    if (paddle2Y < 0) paddle2Y = 0;
+    if (paddle2Y > canvas.height - paddleHeight) paddle2Y = canvas.height - paddleHeight;
+}
 
     function resetBall() {
         x = canvas.width / 2;
