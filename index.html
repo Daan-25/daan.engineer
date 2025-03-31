@@ -1,1 +1,83 @@
-Test
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Tracking Web App</title>
+    <style>
+        #webcam {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        #button {
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            width: 150px;
+            height: 50px;
+            background-color: green;
+            color: black;
+            font-size: 18px;
+            text-align: center;
+            line-height: 50px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <video id="webcam" autoplay></video>
+    <div id="button">Open Window</div>
+
+    <script>
+        // Get the video element
+        const webcam = document.getElementById('webcam');
+
+        // Set up the webcam
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                webcam.srcObject = stream;
+            })
+            .catch((error) => {
+                console.error('Webcam not accessible', error);
+            });
+
+        // Set up MediaPipe Hands for hand tracking
+        const hands = new Hands();
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.7,
+            minTrackingConfidence: 0.7,
+        });
+
+        hands.onResults((results) => {
+            if (results.multiHandLandmarks) {
+                results.multiHandLandmarks.forEach((landmarks) => {
+                    const x = landmarks[8].x * webcam.width;  // x position of the index finger tip
+                    const y = landmarks[8].y * webcam.height; // y position of the index finger tip
+
+                    // Check if the index finger is over the button
+                    const button = document.getElementById('button');
+                    if (x > button.offsetLeft && x < button.offsetLeft + button.offsetWidth &&
+                        y > button.offsetTop && y < button.offsetTop + button.offsetHeight) {
+                        button.style.backgroundColor = 'red';
+                    } else {
+                        button.style.backgroundColor = 'green';
+                    }
+                });
+            }
+        });
+
+        // Start the hand tracking
+        const camera = new Camera(webcam, {
+            onFrame: async () => {
+                await hands.send({ image: webcam });
+            },
+            width: 640,
+            height: 480
+        });
+        camera.start();
+    </script>
+</body>
+</html>
