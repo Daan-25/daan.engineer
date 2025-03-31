@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pong</title>
+    <title>Pong Game</title>
     <style>
         body {
             font-family: 'Courier New', Courier, monospace;
@@ -17,12 +17,20 @@
             margin: 20px auto;
             display: block;
         }
+        .scoreboard {
+            font-size: 24px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
 
 <h1>Pong Game</h1>
 <canvas id="pongCanvas" width="800" height="400"></canvas>
+<div class="scoreboard">
+    <p>Player: <span id="playerScore">0</span> - Computer: <span id="computerScore">0</span></p>
+    <p>Highscore: <span id="highscore">0</span></p>
+</div>
 
 <script>
     const canvas = document.getElementById("pongCanvas");
@@ -39,6 +47,10 @@
     let paddle1Y = (canvas.height - paddleHeight) / 2;
     let paddle2Y = (canvas.height - paddleHeight) / 2;
     const paddleSpeed = 5;
+
+    let playerScore = 0;
+    let computerScore = 0;
+    let highscore = 0;
 
     let upPressed = false;
     let downPressed = false;
@@ -66,8 +78,8 @@
 
     function drawPaddles() {
         ctx.beginPath();
-        ctx.rect(0, paddle1Y, paddleWidth, paddleHeight);
-        ctx.rect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight);
+        ctx.rect(0, paddle1Y, paddleWidth, paddleHeight);  // Player paddle
+        ctx.rect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight);  // Computer paddle
         ctx.fillStyle = "#fff";
         ctx.fill();
         ctx.closePath();
@@ -93,6 +105,7 @@
             if (y > paddle1Y && y < paddle1Y + paddleHeight) {
                 dx = -dx;
             } else {
+                computerScore++;
                 resetBall();
             }
         }
@@ -100,6 +113,7 @@
             if (y > paddle2Y && y < paddle2Y + paddleHeight) {
                 dx = -dx;
             } else {
+                playerScore++;
                 resetBall();
             }
         }
@@ -112,12 +126,26 @@
         if (downPressed && paddle1Y < canvas.height - paddleHeight) {
             paddle1Y += paddleSpeed;
         }
+
+        if (y < paddle2Y + paddleHeight / 2) {
+            paddle2Y -= paddleSpeed;
+        } else if (y > paddle2Y + paddleHeight / 2) {
+            paddle2Y += paddleSpeed;
+        }
     }
 
     function resetBall() {
         x = canvas.width / 2;
         y = canvas.height / 2;
         dx = -dx;
+
+        if (playerScore > highscore) {
+            highscore = playerScore;
+        }
+
+        document.getElementById("playerScore").textContent = playerScore;
+        document.getElementById("computerScore").textContent = computerScore;
+        document.getElementById("highscore").textContent = highscore;
     }
 
     function draw() {
