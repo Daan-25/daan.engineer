@@ -3,92 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pose Estimation Web App</title>
-    <style>
-        #webcam {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
-        #button {
-            position: absolute;
-            top: 100px;
-            left: 100px;
-            width: 150px;
-            height: 50px;
-            background-color: green;
-            color: black;
-            font-size: 18px;
-            text-align: center;
-            line-height: 50px;
-            border-radius: 10px;
-        }
-    </style>
-
-    <!-- Voeg hier de MediaPipe Pose script tag toe -->
+    <title>MediaPipe Pose Test</title>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.3"></script>
 </head>
 <body>
     <video id="webcam" autoplay></video>
-    <div id="button">Open Window</div>
-
     <script>
-        // Get the video element
         const webcam = document.getElementById('webcam');
-
-        // Set up the webcam
         navigator.mediaDevices.getUserMedia({ video: true })
             .then((stream) => {
                 webcam.srcObject = stream;
             })
             .catch((error) => {
-                console.error('Webcam not accessible', error);
+                console.error('Webcam niet toegankelijk', error);
             });
 
-        // Set up MediaPipe Pose for pose estimation
         const pose = new Pose();
         pose.setOptions({
-            modelComplexity: 1,  // Simpler model, faster
-            minDetectionConfidence: 0.5, // Confidence for detecting the body
-            minTrackingConfidence: 0.5,  // Confidence for tracking the body
+            modelComplexity: 1,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5,
         });
 
         pose.onResults((results) => {
-            // Check if pose landmarks are detected
             if (results.poseLandmarks) {
-                const canvas = webcam.getContext('2d');
-                canvas.clearRect(0, 0, webcam.width, webcam.height);
-
-                // Draw the pose landmarks on the webcam feed
-                results.poseLandmarks.forEach((landmark) => {
-                    const x = landmark.x * webcam.width;  // x position
-                    const y = landmark.y * webcam.height; // y position
-
-                    // Draw a circle at each landmark
-                    canvas.beginPath();
-                    canvas.arc(x, y, 5, 0, 2 * Math.PI);
-                    canvas.fillStyle = 'blue';
-                    canvas.fill();
-                });
-
-                // Optionally, draw lines connecting the landmarks
-                for (let i = 0; i < results.poseLandmarks.length - 1; i++) {
-                    const x1 = results.poseLandmarks[i].x * webcam.width;
-                    const y1 = results.poseLandmarks[i].y * webcam.height;
-                    const x2 = results.poseLandmarks[i + 1].x * webcam.width;
-                    const y2 = results.poseLandmarks[i + 1].y * webcam.height;
-
-                    canvas.beginPath();
-                    canvas.moveTo(x1, y1);
-                    canvas.lineTo(x2, y2);
-                    canvas.strokeStyle = 'green';
-                    canvas.lineWidth = 2;
-                    canvas.stroke();
-                }
+                console.log(results.poseLandmarks); // Kijkt of je landmarks kunt krijgen
             }
         });
 
-        // Start the pose estimation
         const camera = new Camera(webcam, {
             onFrame: async () => {
                 await pose.send({ image: webcam });
