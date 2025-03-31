@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fullscreen Video</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: black;
+            text-align: center;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #startButton {
+            padding: 10px 20px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        video {
+            width: 100%;
+            height: auto;
+            display: none; /* Verberg de video tot hij wordt afgespeeld */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Welkom!</h1>
+    <p>Klik op de knop om fullscreen te gaan en de video te starten.</p>
+    <button id="startButton">Start</button>
+
+    <video id="video" controls>
+        <source src="/illegal/Ronaldo suiii.mp4" type="video/mp4">
+        Je browser ondersteunt geen video-elementen.
+    </video>
+
+    <script>
+        function goFullscreen() {
+            let video = document.getElementById("video");
+            video.volume = 1.0; // Zet het volume op 100%
+            video.style.display = "block"; // Maak de video zichtbaar
+            video.play(); // Start de video
+
+            if (video.requestFullscreen) {
+                video.requestFullscreen();
+            } else if (video.mozRequestFullScreen) { // Firefox
+                video.mozRequestFullScreen();
+            } else if (video.webkitRequestFullscreen) { // Chrome, Safari & Edge
+                video.webkitRequestFullscreen();
+            } else if (video.msRequestFullscreen) { // IE/Edge
+                video.msRequestFullscreen();
+            }
+        }
+
+        document.getElementById("startButton").addEventListener("click", function() {
+            goFullscreen();
+        });
+    </script>
+
+</body>
+</html>
