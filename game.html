@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pong - 90s Stijl</title>
+    <title>Pong</title>
     <style>
         body {
             font-family: 'Courier New', Courier, monospace;
@@ -25,29 +25,24 @@
 <canvas id="pongCanvas" width="800" height="400"></canvas>
 
 <script>
-    // Setup Canvas
     const canvas = document.getElementById("pongCanvas");
     const ctx = canvas.getContext("2d");
 
-    // Ball properties
     let ballRadius = 10;
     let x = canvas.width / 2;
     let y = canvas.height / 2;
     let dx = 4;
     let dy = -4;
 
-    // Paddle properties
     const paddleWidth = 10;
     const paddleHeight = 100;
     let paddle1Y = (canvas.height - paddleHeight) / 2;
     let paddle2Y = (canvas.height - paddleHeight) / 2;
     const paddleSpeed = 5;
 
-    // Controls
     let upPressed = false;
     let downPressed = false;
 
-    // Player 1 paddle movement (up and down)
     document.addEventListener("keydown", keyDownHandler, false);
     document.addEventListener("keyup", keyUpHandler, false);
 
@@ -69,7 +64,6 @@
         }
     }
 
-    // Draw paddles and ball
     function drawPaddles() {
         ctx.beginPath();
         ctx.rect(0, paddle1Y, paddleWidth, paddleHeight);
@@ -91,17 +85,14 @@
         x += dx;
         y += dy;
 
-        // Ball collision with top and bottom
         if (y + dy < ballRadius || y + dy > canvas.height - ballRadius) {
             dy = -dy;
         }
 
-        // Ball collision with paddles
         if (x + dx < paddleWidth) {
             if (y > paddle1Y && y < paddle1Y + paddleHeight) {
                 dx = -dx;
             } else {
-                // Player 2 scores
                 resetBall();
             }
         }
@@ -109,7 +100,6 @@
             if (y > paddle2Y && y < paddle2Y + paddleHeight) {
                 dx = -dx;
             } else {
-                // Player 1 scores
                 resetBall();
             }
         }
