@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klikspel</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f0f0f0;
+            text-align: center;
+            color: #333;
+            margin-top: 50px;
+        }
+        #gameArea {
+            border: 2px solid #333;
+            padding: 20px;
+            width: 200px;
+            margin: 0 auto;
+            background-color: #fff;
+        }
+        #clickButton {
+            background-color: #008CBA;
+            color: white;
+            font-size: 20px;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            width: 100%;
+        }
+        #clickButton:hover {
+            background-color: #005f7a;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Klikspel!</h1>
+    <div id="gameArea">
+        <p id="timer">Tijd over: 10</p>
+        <button id="clickButton" onclick="clickButton()">Klik hier!</button>
+        <p>Punten: <span id="score">0</span></p>
+        <p id="gameOver" class="hidden">Game Over! Je score is: <span id="finalScore"></span></p>
+    </div>
+
+    <script>
+        let score = 0;
+        let timeLeft = 10;
+        let timer;
+        let isGameActive = true;
+
+        function startGame() {
+            timer = setInterval(function() {
+                timeLeft--;
+                document.getElementById("timer").innerText = "Tijd over: " + timeLeft;
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        window.onload = function() {
+            startGame();
+        };
+
+        function clickButton() {
+            if (isGameActive) {
+                score++;
+                document.getElementById("score").innerText = score;
+            }
+        }
+
+        function endGame() {
+            clearInterval(timer);
+            isGameActive = false;
+            document.getElementById("gameOver").classList.remove("hidden");
+            document.getElementById("finalScore").innerText = score;
+            document.getElementById("clickButton").disabled = true;
+        }
+    </script>
+</body>
+</html>
