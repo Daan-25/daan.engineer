@@ -3,151 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pong Game</title>
+    <title>Pong Game - 90s Style</title>
     <style>
-        canvas {
-            background-color: black;
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #000;
+            color: white;
+            text-align: center;
+            margin: 0;
+        }
+        #pongCanvas {
+            border: 5px solid white;
+            margin: 20px auto;
             display: block;
-            margin: 0 auto;
+        }
+        .scoreboard {
+            font-size: 24px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <h1 style="text-align: center;">Pong Game</h1>
-    <canvas id="pong" width="600" height="400"></canvas>
-    <script>
-        const canvas = document.getElementById("pong");
-        const ctx = canvas.getContext("2d");
 
-        // Paddles en bal instellingen
-        const paddleWidth = 10, paddleHeight = 100, ballSize = 10;
-        let paddle1Y = canvas.height / 2 - paddleHeight / 2, paddle2Y = canvas.height / 2 - paddleHeight / 2;
-        let playerScore = 0, computerScore = 0;
-        let ballX = canvas.width / 2, ballY = canvas.height / 2;
-        let ballDX = 3, ballDY = 3; // Balbeweging
+<h1>Pong Game</h1>
+<canvas id="pongCanvas" width="800" height="400"></canvas>
+<div class="scoreboard">
+    <p>Player: <span id="playerScore">0</span> - Computer: <span id="computerScore">0</span></p>
+    <p>Highscore: <span id="highscore">0</span></p>
+</div>
 
-        // Paddle beweging
-        let paddleSpeed = 5;
-        let upPressed = false, downPressed = false;
+<script>
+    // Setup Canvas
+    const canvas = document.getElementById("pongCanvas");
+    const ctx = canvas.getContext("2d");
 
-        // Besturing speler
-        document.addEventListener("keydown", keyDownHandler, false);
-        document.addEventListener("keyup", keyUpHandler, false);
+    // Ball properties
+    let ballRadius = 10;
+    let x = canvas.width / 2;
+    let y = canvas.height / 2;
+    let dx = 4;
+    let dy = -4;
 
-        function keyDownHandler(e) {
-            if (e.key == "Up" || e.key == "ArrowUp") {
-                upPressed = true;
-            } else if (e.key == "Down" || e.key == "ArrowDown") {
-                downPressed = true;
-            }
+    // Paddle properties
+    const paddleWidth = 10;
+    const paddleHeight = 100;
+    let paddle1Y = (canvas.height - paddleHeight) / 2; // Player paddle
+    let paddle2Y = (canvas.height - paddleHeight) / 2; // Computer paddle
+    const paddleSpeed = 5;
+
+    // Scores
+    let playerScore = 0;
+    let computerScore = 0;
+    let highscore = 0;
+
+    // Controls
+    let upPressed = false;
+    let downPressed = false;
+
+    // Player 1 paddle movement (up and down)
+    document.addEventListener("keydown", keyDownHandler, false);
+    document.addEventListener("keyup", keyUpHandler, false);
+
+    function keyDownHandler(e) {
+        if (e.key == "Up" || e.key == "ArrowUp") {
+            upPressed = true;
+        }
+        if (e.key == "Down" || e.key == "ArrowDown") {
+            downPressed = true;
+        }
+    }
+
+    function keyUpHandler(e) {
+        if (e.key == "Up" || e.key == "ArrowUp") {
+            upPressed = false;
+        }
+        if (e.key == "Down" || e.key == "ArrowDown") {
+            downPressed = false;
+        }
+    }
+
+    // Draw paddles and ball
+    function drawPaddles() {
+        ctx.beginPath();
+        ctx.rect(0, paddle1Y, paddleWidth, paddleHeight);  // Player paddle
+        ctx.rect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight);  // Computer paddle
+        ctx.fillStyle = "#fff";
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    function drawBall() {
+        ctx.beginPath();
+        ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+        ctx.fillStyle = "#fff";
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    function moveBall() {
+        x += dx;
+        y += dy;
+
+        // Ball collision with top and bottom
+        if (y + dy < ballRadius || y + dy > canvas.height - ballRadius) {
+            dy = -dy;
         }
 
-        function keyUpHandler(e) {
-            if (e.key == "Up" || e.key == "ArrowUp") {
-                upPressed = false;
-            } else if (e.key == "Down" || e.key == "ArrowDown") {
-                downPressed = false;
-            }
-        }
-
-        // Beweeg de paddles
-        function movePaddles() {
-            if (upPressed && paddle1Y > 0) {
-                paddle1Y -= paddleSpeed;
-            }
-            if (downPressed && paddle1Y < canvas.height - paddleHeight) {
-                paddle1Y += paddleSpeed;
-            }
-
-            // Computer paddle AI
-            if (ballY < paddle2Y + paddleHeight / 2) {
-                paddle2Y -= paddleSpeed;
-            } else if (ballY > paddle2Y + paddleHeight / 2) {
-                paddle2Y += paddleSpeed;
-            }
-
-            // Beperk de paddles binnen het canvas
-            if (paddle1Y < 0) paddle1Y = 0;
-            if (paddle1Y > canvas.height - paddleHeight) paddle1Y = canvas.height - paddleHeight;
-
-            if (paddle2Y < 0) paddle2Y = 0;
-            if (paddle2Y > canvas.height - paddleHeight) paddle2Y = canvas.height - paddleHeight;
-        }
-
-        // Beweeg de bal
-        function moveBall() {
-            ballX += ballDX;
-            ballY += ballDY;
-
-            // Ball collision met de boven- en onderkant
-            if (ballY + ballSize > canvas.height || ballY - ballSize < 0) {
-                ballDY = -ballDY;
-            }
-
-            // Ball collision met de paddles
-            if (ballX - ballSize < paddleWidth && ballY > paddle1Y && ballY < paddle1Y + paddleHeight) {
-                ballDX = -ballDX;
-            }
-            if (ballX + ballSize > canvas.width - paddleWidth && ballY > paddle2Y && ballY < paddle2Y + paddleHeight) {
-                ballDX = -ballDX;
-            }
-
-            // Scoring
-            if (ballX + ballSize < 0) {
-                // Computer score
+        // Ball collision with paddles
+        if (x + dx < paddleWidth) { // Player paddle
+            if (y > paddle1Y && y < paddle1Y + paddleHeight) {
+                dx = -dx;
+            } else {
+                // Computer scores
                 computerScore++;
                 resetBall();
-            } else if (ballX - ballSize > canvas.width) {
-                // Player score
+            }
+        }
+        if (x + dx > canvas.width - paddleWidth) { // Computer paddle
+            if (y > paddle2Y && y < paddle2Y + paddleHeight) {
+                dx = -dx;
+            } else {
+                // Player scores
                 playerScore++;
                 resetBall();
             }
         }
+    }
 
-        // Reset de bal naar het midden na een score
-        function resetBall() {
-            ballX = canvas.width / 2;
-            ballY = canvas.height / 2;
-            ballDX = -ballDX; // Verander de richting van de bal
+    function movePaddles() {
+        // Player paddle movement
+        if (upPressed && paddle1Y > 0) {
+            paddle1Y -= paddleSpeed;
+        }
+        if (downPressed && paddle1Y < canvas.height - paddleHeight) {
+            paddle1Y += paddleSpeed;
         }
 
-        // Teken de score
-        function drawScore() {
-            ctx.font = "16px Arial";
-            ctx.fillStyle = "#FFF";
-            ctx.fillText("Player: " + playerScore, canvas.width / 4, 20);
-            ctx.fillText("Computer: " + computerScore, canvas.width * 3 / 4, 20);
+        // Computer paddle movement (AI)
+        if (y < paddle2Y + paddleHeight / 2) {
+            paddle2Y -= paddleSpeed;
+        } else if (y > paddle2Y + paddleHeight / 2) {
+            paddle2Y += paddleSpeed;
+        }
+    }
+
+    function resetBall() {
+        x = canvas.width / 2;
+        y = canvas.height / 2;
+        dx = -dx;
+
+        // Update the highscore
+        if (playerScore > highscore) {
+            highscore = playerScore;
         }
 
-        // Teken de paddles en de bal
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Wis het canvas
+        // Update the scoreboard
+        document.getElementById("playerScore").textContent = playerScore;
+        document.getElementById("computerScore").textContent = computerScore;
+        document.getElementById("highscore").textContent = highscore;
+    }
 
-            // Teken de paddles
-            ctx.fillStyle = "#FFF";
-            ctx.fillRect(0, paddle1Y, paddleWidth, paddleHeight); // Speler paddle
-            ctx.fillRect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight); // Computer paddle
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBall();
+        drawPaddles();
+        moveBall();
+        movePaddles();
+        requestAnimationFrame(draw);
+    }
 
-            // Teken de bal
-            ctx.beginPath();
-            ctx.arc(ballX, ballY, ballSize, 0, Math.PI * 2);
-            ctx.fillStyle = "#FFF";
-            ctx.fill();
-            ctx.closePath();
+    draw();
+</script>
 
-            drawScore(); // Teken de score
-        }
-
-        // De game loop
-        function gameLoop() {
-            movePaddles();
-            moveBall();
-            draw();
-            requestAnimationFrame(gameLoop); // Volgende frame
-        }
-
-        // Start de game
-        gameLoop();
-    </script>
 </body>
 </html>
