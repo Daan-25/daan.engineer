@@ -8,44 +8,49 @@
         body {
             margin: 0;
             background-color: black;
-            text-align: center;
-            color: white;
-            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         video {
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: cover; /* Zorgt ervoor dat de video het scherm vult */
         }
     </style>
 </head>
 <body>
 
     <video id="video" loop autoplay>
-        <source src="/illegal/Ronaldo suiii.mp4" type="video/mp4">
+        <source src="video.mp4" type="video/mp4">
         Je browser ondersteunt geen video-elementen.
     </video>
 
     <script>
-        window.onload = function() {
-            let video = document.getElementById("video");
+        let video = document.getElementById("video");
 
+        function makeFullscreen() {
+            if (video.requestFullscreen) {
+                video.requestFullscreen();
+            } else if (video.mozRequestFullScreen) { // Firefox
+                video.mozRequestFullScreen();
+            } else if (video.webkitRequestFullscreen) { // Chrome, Safari & Edge
+                video.webkitRequestFullscreen();
+            } else if (video.msRequestFullscreen) { // IE/Edge
+                video.msRequestFullscreen();
+            }
+
+            video.playbackRate = 2.0; // Versnel de video
             video.volume = 1.0; // Zet volume op 100%
-            video.playbackRate = 2.0; // Versnel de video (2x snelheid)
+            video.play(); // Start de video
 
-            video.play().then(() => {
-                if (video.requestFullscreen) {
-                    video.requestFullscreen();
-                } else if (video.mozRequestFullScreen) { // Firefox
-                    video.mozRequestFullScreen();
-                } else if (video.webkitRequestFullscreen) { // Chrome, Safari & Edge
-                    video.webkitRequestFullscreen();
-                } else if (video.msRequestFullscreen) { // IE/Edge
-                    video.msRequestFullscreen();
-                }
-            }).catch(error => {
-                console.error("Autoplay is geblokkeerd door de browser:", error);
-            });
-        };
+            // Verwijder de eventlistener na de eerste klik
+            document.removeEventListener("click", makeFullscreen);
+        }
+
+        // Wacht op een klik van de gebruiker om fullscreen te activeren
+        document.addEventListener("click", makeFullscreen);
     </script>
 
 </body>
