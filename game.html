@@ -3,33 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pong Game</title>
+    <title>Bitcoin Pong</title>
     <style>
         body {
             font-family: 'Courier New', Courier, monospace;
-            background-color: #000;
-            color: white;
+            background-color: #1a1a1a;
+            color: #f2a900;
             text-align: center;
             margin: 0;
         }
         #pongCanvas {
-            border: 5px solid white;
+            border: 5px solid #f2a900;
             margin: 20px auto;
             display: block;
+            background-color: #000;
         }
         .scoreboard {
             font-size: 24px;
             margin-top: 20px;
+            color: #fff;
+        }
+        .bitcoin-title {
+            font-size: 48px;
+            text-shadow: 0 0 10px #f2a900;
         }
     </style>
 </head>
 <body>
 
-<h1>Pong Game</h1>
+<h1 class="bitcoin-title">Bitcoin Pong</h1>
 <canvas id="pongCanvas" width="800" height="400"></canvas>
 <div class="scoreboard">
-    <p>Player: <span id="playerScore">0</span> - Computer: <span id="computerScore">0</span></p>
-    <p>Highscore: <span id="highscore">0</span></p>
+    <p>Miner: <span id="playerScore">0</span> BTC - Network: <span id="computerScore">0</span> BTC</p>
+    <p>Block Reward: <span id="highscore">0</span> BTC</p>
 </div>
 
 <script>
@@ -47,9 +53,10 @@
     // Paddle properties
     const paddleWidth = 10;
     const paddleHeight = 100;
-    let paddle1Y = (canvas.height - paddleHeight) / 2; // Player paddle
-    let paddle2Y = (canvas.height - paddleHeight) / 2; // Computer paddle
+    let paddle1Y = (canvas.height - paddleHeight) / 2; // Miner paddle
+    let paddle2Y = (canvas.height - paddleHeight) / 2; // Network paddle
     const paddleSpeed = 5;
+    const networkSpeed = 3; // Langzamere snelheid voor Network
 
     // Scores
     let playerScore = 0;
@@ -60,7 +67,7 @@
     let upPressed = false;
     let downPressed = false;
 
-    // Player 1 paddle movement (up and down)
+    // Miner paddle movement
     document.addEventListener("keydown", keyDownHandler, false);
     document.addEventListener("keyup", keyUpHandler, false);
 
@@ -85,9 +92,9 @@
     // Draw paddles and ball
     function drawPaddles() {
         ctx.beginPath();
-        ctx.rect(0, paddle1Y, paddleWidth, paddleHeight);  // Player paddle
-        ctx.rect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight);  // Computer paddle
-        ctx.fillStyle = "#fff";
+        ctx.rect(0, paddle1Y, paddleWidth, paddleHeight);  // Miner paddle
+        ctx.rect(canvas.width - paddleWidth, paddle2Y, paddleWidth, paddleHeight);  // Network paddle
+        ctx.fillStyle = "#f2a900";
         ctx.fill();
         ctx.closePath();
     }
@@ -95,35 +102,35 @@
     function drawBall() {
         ctx.beginPath();
         ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
-        ctx.fillStyle = "#fff";
+        ctx.fillStyle = "#f2a900";
         ctx.fill();
         ctx.closePath();
+        ctx.font = "12px Arial";
+        ctx.fillStyle = "#fff";
+        ctx.textAlign = "center";
+        ctx.fillText("₿", x, y + 4);
     }
 
     function moveBall() {
         x += dx;
         y += dy;
 
-        // Ball collision with top and bottom
         if (y + dy < ballRadius || y + dy > canvas.height - ballRadius) {
             dy = -dy;
         }
 
-        // Ball collision with paddles
-        if (x + dx < paddleWidth) { // Player paddle
+        if (x + dx < paddleWidth) { // Miner paddle
             if (y > paddle1Y && y < paddle1Y + paddleHeight) {
                 dx = -dx;
             } else {
-                // Computer scores
                 computerScore++;
                 resetBall();
             }
         }
-        if (x + dx > canvas.width - paddleWidth) { // Computer paddle
+        if (x + dx > canvas.width - paddleWidth) { // Network paddle
             if (y > paddle2Y && y < paddle2Y + paddleHeight) {
                 dx = -dx;
             } else {
-                // Player scores
                 playerScore++;
                 resetBall();
             }
@@ -131,7 +138,7 @@
     }
 
     function movePaddles() {
-        // Player paddle movement
+        // Miner paddle movement
         if (upPressed && paddle1Y > 0) {
             paddle1Y -= paddleSpeed;
         }
@@ -139,11 +146,14 @@
             paddle1Y += paddleSpeed;
         }
 
-        // Computer paddle movement (AI)
-        if (y < paddle2Y + paddleHeight / 2) {
-            paddle2Y -= paddleSpeed;
-        } else if (y > paddle2Y + paddleHeight / 2) {
-            paddle2Y += paddleSpeed;
+        // Network paddle movement (zwakkere AI)
+        let targetY = y - paddleHeight / 2; // Doel is minder precies
+        if (Math.random() > 0.1) { // 10% kans dat Network niet beweegt (vertraging)
+            if (paddle2Y + paddleHeight / 2 < targetY && paddle2Y < canvas.height - paddleHeight) {
+                paddle2Y += networkSpeed; // Langzamere beweging
+            } else if (paddle2Y + paddleHeight / 2 > targetY && paddle2Y > 0) {
+                paddle2Y -= networkSpeed;
+            }
         }
     }
 
@@ -152,12 +162,10 @@
         y = canvas.height / 2;
         dx = -dx;
 
-        // Update the highscore
         if (playerScore > highscore) {
             highscore = playerScore;
         }
 
-        // Update the scoreboard
         document.getElementById("playerScore").textContent = playerScore;
         document.getElementById("computerScore").textContent = computerScore;
         document.getElementById("highscore").textContent = highscore;
