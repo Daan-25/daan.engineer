@@ -9,7 +9,7 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background: url('https://via.placeholder.com/1920x1080.png?text=Space+Background') no-repeat center center fixed;
+            background: url('images/space-background.jpg') no-repeat center center fixed;
             background-size: cover;
         }
         #gameCanvas {
@@ -67,7 +67,7 @@
         dy: 0,
         img: new Image()
     };
-    player.img.src = 'https://via.placeholder.com/50x30.png?text=Drone';
+    player.img.src = 'images/drone.png'; // Lokale afbeelding voor de drone
 
     // Bitcoin asteroïden
     let bitcoins = [];
@@ -79,7 +79,7 @@
             this.height = 30;
             this.speed = Math.random() * 2 + 2;
             this.img = new Image();
-            this.img.src = 'https://via.placeholder.com/30x30.png?text=Bitcoin';
+            this.img.src = 'images/bitcoin.png'; // Lokale afbeelding voor Bitcoin
         }
         update() {
             this.x -= this.speed;
@@ -99,7 +99,7 @@
             this.height = 40;
             this.speed = Math.random() * 3 + 2;
             this.img = new Image();
-            this.img.src = 'https://via.placeholder.com/40x40.png?text=Rock';
+            this.img.src = 'images/rock.png'; // Lokale afbeelding voor obstakel
         }
         update() {
             this.x -= this.speed;
