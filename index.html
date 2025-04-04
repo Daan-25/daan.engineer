@@ -1,30 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Welcome!</title>
+    <title>Welcome to daan.engineer!</title>
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <style>
         body {
-            background-color: #0000AA;
-            color: yellow;
-            font-family: "Comic Sans MS", cursive;
+            background: linear-gradient(135deg, #1a1a1a, #2b2b2b); /* Donkere gradiënt */
+            color: #f2f2f2; /* Lichte tekst */
+            font-family: 'Courier New', monospace; /* Bitcoin-tech vibe */
             text-align: center;
+            margin: 0;
+            min-height: 100vh;
         }
         .container {
             width: 80%;
-            margin: auto;
-            border: 5px dashed red;
-            padding: 10px;
-            background-color: black;
+            margin: 20px auto;
+            border: 5px dashed #f7931a; /* Bitcoin-oranje dashed rand */
+            padding: 20px;
+            background-color: #212121; /* Donkere achtergrond */
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(247, 147, 26, 0.2); /* Subtiele oranje schaduw */
         }
         .marquee {
             font-size: 24px;
             font-weight: bold;
-            color: lime;
+            color: #f7931a; /* Bitcoin-oranje */
+            text-shadow: 0 2px 4px rgba(247, 147, 26, 0.5);
         }
         .blink {
             animation: blink 1s infinite alternate;
-            color: red;
+            color: #ff6f61; /* Zacht rood voor contrast */
+            font-size: 2em;
         }
         @keyframes blink {
             from { opacity: 1; }
@@ -32,19 +38,40 @@
         }
         .table {
             width: 100%;
-            border: 2px solid yellow;
+            border: 2px solid #f7931a; /* Bitcoin-oranje rand */
+            margin: 20px 0;
         }
         .table td {
-            padding: 10px;
-            border: 1px solid white;
+            padding: 15px;
+            border: 1px solid #f7931a66; /* Lichter oranje voor binnenranden */
+        }
+        a {
+            color: #f7931a; /* Bitcoin-oranje links */
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        a:hover {
+            color: #e07b10; /* Donkerder oranje bij hover */
+        }
+        h1 {
+            color: #f7931a;
+            text-shadow: 0 2px 6px rgba(247, 147, 26, 0.5);
+        }
+        p {
+            color: #f2f2f2;
+        }
+        img {
+            border: 2px solid #f7931a; /* Oranje rand rond de afbeelding */
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
-    <marquee class="marquee">🔥 Welcome to my website! 🔥</marquee>
+    <marquee class="marquee">₿ Welcome to daan.engineer!₿</marquee>
     <div class="container">
-        <h1>🚀 My webpage 🚀</h1>
-        <p class="blink">🐱</p>
+        <h1>₿ My Webpage ₿</h1>
+        <p class="blink">bc1qes7r07fqrcpe86np2drnr7cuc56geggnp39aen</p>
         <img src="/illegal/frank.gif" alt="Frank GIF">
         <table class="table">
             <tr>
