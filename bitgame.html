@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Mining Clicker</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #1a1a1a;
+            color: #f2a900;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+        }
+        h1 {
+            font-size: 48px;
+            text-shadow: 0 0 10px #f2a900;
+            position: relative;
+            z-index: 1;
+        }
+        #bitcoinCount {
+            font-size: 36px;
+            color: #fff;
+            position: relative;
+            z-index: 1;
+        }
+        #gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            background-color: #1a1a1a;
+        }
+        #mineButton {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 24px;
+            padding: 20px 40px;
+            background-color: #f2a900;
+            color: #000;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s;
+            position: relative;
+            z-index: 1;
+        }
+        #mineButton:hover {
+            transform: scale(1.05);
+        }
+        #mineButton:active {
+            transform: scale(0.95);
+        }
+        .upgrade {
+            margin: 10px;
+            padding: 10px;
+            background-color: rgba(51, 51, 51, 0.8);
+            border: 2px solid #f2a900;
+            border-radius: 5px;
+            display: inline-block;
+            width: 200px;
+            color: #fff;
+            position: relative;
+            z-index: 1;
+        }
+        .upgrade button {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f2a900;
+            color: #000;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .upgrade button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+        .click-feedback {
+            position: absolute;
+            color: #f2a900;
+            font-size: 20px;
+            pointer-events: none;
+            z-index: 2;
+            animation: fadeOut 1s ease-out forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-50px); }
+        }
+    </style>
+</head>
+<body>
+
+<h1>Bitcoin Mining Clicker</h1>
+<p id="bitcoinCount">BTC: 0</p>
+<button id="mineButton">Mine ₿</button>
+
+<div id="upgrades">
+    <div class="upgrade">
+        <p>Extra GPU</p>
+        <p>Cost: <span id="gpuCost">10</span> BTC</p>
+        <p>Mines: +0.1 BTC/s</p>
+        <button id="buyGpu">Buy</button>
+    </div>
+    <div class="upgrade">
+        <p>Mining Rig</p>
+        <p>Cost: <span id="rigCost">50</span> BTC</p>
+        <p>Mines: +1 BTC/s</p>
+        <button id="buyRig">Buy</button>
+    </div>
+    <div class="upgrade">
+        <p>ASIC Miner</p>
+        <p>Cost: <span id="asicCost">200</span> BTC</p>
+        <p>Mines: +5 BTC/s</p>
+        <button id="buyAsic">Buy</button>
+    </div>
+</div>
+
+<canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<script>
+    // Canvas setup
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Game variables
+    let bitcoins = 0;
+    let btcPerClick = 1;
+    let btcPerSecond = 0;
+    let gpuCost = 10;
+    let rigCost = 50;
+    let asicCost = 200;
+
+    // DOM elements
+    const bitcoinCount = document.getElementById("bitcoinCount");
+    const mineButton = document.getElementById("mineButton");
+    const buyGpu = document.getElementById("buyGpu");
+    const buyRig = document.getElementById("buyRig");
+    const buyAsic = document.getElementById("buyAsic");
+    const gpuCostDisplay = document.getElementById("gpuCost");
+    const rigCostDisplay = document.getElementById("rigCost");
+    const asicCostDisplay = document.getElementById("asicCost");
+
+    // Bitcoin particles
+    let particles = [];
+    class Particle {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.size = Math.random() * 20 + 10;
+            this.speedX = (Math.random() - 0.5) * 2;
+            this.speedY = (Math.random() - 0.5) * 2;
+            this.life = 100;
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            this.life--;
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(242, 169, 0, ${this.life / 100})`;
+            ctx.fill();
+            ctx.font = `${this.size / 2}px Arial`;
+            ctx.fillStyle = "#fff";
+            ctx.textAlign = "center";
+            ctx.fillText("₿", this.x, this.y + this.size / 4);
+        }
+    }
+
+    // Klik feedback
+    function showClickFeedback(x, y, value) {
+        const feedback = document.createElement("div");
+        feedback.className = "click-feedback";
+        feedback.textContent = `+${value} BTC`;
+        feedback.style.left = `${x}px`;
+        feedback.style.top = `${y}px`;
+        document.body.appendChild(feedback);
+        setTimeout(() => feedback.remove(), 1000);
+    }
+
+    // Event listeners
+    mineButton.addEventListener("click", (e) => {
+        bitcoins += btcPerClick;
+        const rect = mineButton.getBoundingClientRect();
+        particles.push(new Particle(rect.left + rect.width / 2, rect.top + rect.height / 2));
+        showClickFeedback(e.clientX, e.clientY, btcPerClick);
+        updateDisplay();
+    });
+
+    buyGpu.addEventListener("click", () => {
+        if (bitcoins >= gpuCost) {
+            bitcoins -= gpuCost;
+            btcPerSecond += 0.1;
+            gpuCost = Math.floor(gpuCost * 1.5);
+            updateDisplay();
+        }
+    });
+
+    buyRig.addEventListener("click", () => {
+        if (bitcoins >= rigCost) {
+            bitcoins -= rigCost;
+            btcPerSecond += 1;
+            rigCost = Math.floor(rigCost * 1.5);
+            updateDisplay();
+        }
+    });
+
+    buyAsic.addEventListener("click", () => {
+        if (bitcoins >= asicCost) {
+            bitcoins -= asicCost;
+            btcPerSecond += 5;
+            asicCost = Math.floor(asicCost * 1.5);
+            updateDisplay();
+        }
+    });
+
+    // Automatisch minen
+    setInterval(() => {
+        bitcoins += btcPerSecond;
+        if (btcPerSecond > 0 && Math.random() < 0.3) {
+            particles.push(new Particle(canvas.width / 2, canvas.height / 2));
+        }
+        updateDisplay();
+    }, 1000);
+
+    // Update display
+    function updateDisplay() {
+        bitcoinCount.textContent = `BTC: ${bitcoins.toFixed(2)}`;
+        gpuCostDisplay.textContent = gpuCost;
+        rigCostDisplay.textContent = rigCost;
+        asicCostDisplay.textContent = asicCost;
+        buyGpu.disabled = bitcoins < gpuCost;
+        buyRig.disabled = bitcoins < rigCost;
+        buyAsic.disabled = bitcoins < asicCost;
+    }
+
+    // Animatie loop
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Teken achtergrond "mining" effect
+        ctx.fillStyle = "rgba(242, 169, 0, 0.05)";
+        for (let i = 0; i < 10; i++) {
+            ctx.beginPath();
+            ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Teken en update particles
+        particles = particles.filter(p => p.life > 0);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+
+        requestAnimationFrame(animate);
+    }
+
+    // Start de game
+    updateDisplay();
+    animate();
+</script>
+
+</body>
+</html>
