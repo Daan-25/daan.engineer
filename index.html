@@ -1,94 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="nl">
 <head>
-    <title>₿</title>
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <style>
-        body {
-            background: linear-gradient(135deg, #1a1a1a, #2b2b2b); /* Donkere gradiënt */
-            color: #f2f2f2; /* Lichte tekst */
-            font-family: 'Courier New', monospace; /* Bitcoin-tech vibe */
-            text-align: center;
-            margin: 0;
-            min-height: 100vh;
-        }
-        .container {
-            width: 80%;
-            margin: 20px auto;
-            border: 5px dashed #f7931a; /* Bitcoin-oranje dashed rand */
-            padding: 20px;
-            background-color: #212121; /* Donkere achtergrond */
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(247, 147, 26, 0.2); /* Subtiele oranje schaduw */
-        }
-        .marquee {
-            font-size: 24px;
-            font-weight: bold;
-            color: #f7931a; /* Bitcoin-oranje */
-            text-shadow: 0 2px 4px rgba(247, 147, 26, 0.5);
-        }
-        .blink {
-            animation: blink 1s infinite alternate;
-            color: #ff6f61; /* Zacht rood voor contrast */
-            font-size: 2em;
-        }
-        @keyframes blink {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        .table {
-            width: 100%;
-            border: 2px solid #f7931a; /* Bitcoin-oranje rand */
-            margin: 20px 0;
-        }
-        .table td {
-            padding: 15px;
-            border: 1px solid #f7931a66; /* Lichter oranje voor binnenranden */
-        }
-        a {
-            color: #f7931a; /* Bitcoin-oranje links */
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s;
-        }
-        a:hover {
-            color: #e07b10; /* Donkerder oranje bij hover */
-        }
-        h1 {
-            color: #f7931a;
-            text-shadow: 0 2px 6px rgba(247, 147, 26, 0.5);
-        }
-        p {
-            color: #f2f2f2;
-        }
-        img {
-            border: 2px solid #f7931a; /* Oranje rand rond de afbeelding */
-            border-radius: 8px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Daan's Crypto Zone ₿</title>
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background-color: #111;
+      color: #f2f2f2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      width: 100%;
+      background: linear-gradient(to right, #f7931a, #ff9a3c);
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5em;
+      color: #000;
+    }
+    .content {
+      max-width: 1000px;
+      width: 90%;
+      margin: 40px auto;
+      background: #1e1e1e;
+      border: 2px solid #f7931a;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 0 20px rgba(255, 122, 0, 0.2);
+    }
+    nav {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin: 30px 0;
+    }
+    nav a {
+      background: #f7931a;
+      color: #111;
+      text-decoration: none;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+      transition: transform 0.3s ease;
+    }
+    nav a:hover {
+      transform: scale(1.05);
+      background-color: #e07b10;
+    }
+    .donations code {
+      display: block;
+      background: #2b2b2b;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 6px;
+      color: #f7931a;
+      font-size: 0.95em;
+    }
+    footer {
+      margin-top: 50px;
+      padding: 20px;
+      font-size: 0.9em;
+      color: #aaa;
+    }
+    img {
+      margin-top: 20px;
+      max-width: 100%;
+      border: 2px solid #f7931a;
+      border-radius: 12px;
+    }
+  </style>
 </head>
 <body>
-    <marquee class="marquee">₿ Welcome to daan.engineer!₿</marquee>
-    <div class="container">
-        <h1>₿</h1>
-        <p class="blink">🪙</p>
-        <img src="/illegal/bitmunt.gif" alt="Bitmunt GIF">
-        <table class="table">
-            <tr>
-                <td><a href="https://bitcoinen.me">Bitcoin Page</a></td>
-                <td><a href="me.html">About Me (Don't click)</a></td>
-                <td><a href="/game.html">PongGame</a></td>
-                <td><a href="https://chat.daan.engineer">Chat</a></td>
-                <td><a href="/bitgame.html">BitGame</a></td>
-                <td><a href="/bitspace.html">BitSpace</a></td>
-                <td><a href="https://gta.daan.engineer">GTA 6</a></td>
-            </tr>
-        </table>
-        <p>Thanks for visiting my site!</p>
-        <p>Donate:</p>
-        <p>BTC: 1DaanEnGj5xnFcbd2H8USYyCsu4L8xH7Gc</p>
-        <p>LTC: ltc1q0d5r0954yrkjfsslkxk6gr3n768tt2lka2jpxd</p>
-        <p>DOGE: D68TiYqRf8tWFu3pkRzEvjDiaYqbibq6Mj</p>
+  <header>
+    <h1>Welcome to Daan.Engineer ₿</h1>
+  </header>
+  <div class="content">
+    <img src="/illegal/bitmunt.gif" alt="Bitmunt">
+    
+    <nav>
+      <a href="https://bitcoinen.me">Bitcoin Page</a>
+      <a href="me.html">About Me</a>
+      <a href="/game.html">PongGame</a>
+      <a href="https://chat.daan.engineer">Chat</a>
+      <a href="/bitgame.html">BitGame</a>
+      <a href="/bitspace.html">BitSpace</a>
+      <a href="https://gta.daan.engineer">GTA 6</a>
+    </nav>
+    
+    <div class="donations">
+      <h2>💸 Steun mijn site</h2>
+      <code>BTC: 1DaanEnGj5xnFcbd2H8USYyCsu4L8xH7Gc</code>
+      <code>LTC: ltc1q0d5r0954yrkjfsslkxk6gr3n768tt2lka2jpxd</code>
+      <code>DOGE: D68TiYqRf8tWFu3pkRzEvjDiaYqbibq6Mj</code>
     </div>
+
+    <footer>Bedankt voor je bezoek aan daan.engineer 🚀</footer>
+  </div>
 </body>
 </html>
