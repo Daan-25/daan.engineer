@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PoW Simulator — Daan.Engineer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --accent:#f7931a; --bg:#0f0f10; --bg2:#161618; --fg:#f2f2f2; --muted:#bfbfbf;
+      --border:#2a2a2e; --radius:14px; --shadow:0 10px 30px rgba(247,147,26,.18);
+    }
+    body { margin:0; background:linear-gradient(135deg,var(--bg),var(--bg2) 60%); color:var(--fg);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+    h1,h2 { margin: 0 0 10px; }
+    .panel { border:1px solid var(--border); border-radius: var(--radius);
+      background: linear-gradient(180deg,#ffffff08,transparent); padding:16px; box-shadow: var(--shadow); }
+    .grid { display:grid; gap:12px; }
+    .cols { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:12px; }
+    label { font-size:.9rem; color:var(--muted); display:block; margin-bottom:6px; }
+    input[type="text"], textarea, input[type="number"] {
+      width:100%; padding:10px 12px; background:#0000002a; color:var(--fg); border:1px solid var(--border);
+      border-radius:10px; outline:none;
+    }
+    textarea { min-height: 80px; resize: vertical; }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .btn { appearance:none; border:1px solid var(--border); background:linear-gradient(180deg,var(--bg2),#ffffff08);
+      color:var(--fg); padding:10px 12px; border-radius:10px; font-weight:700; cursor:pointer; }
+    .btn:hover { border-color:#f7931a66; box-shadow:0 0 16px rgba(247,147,26,.25); }
+    .btn--accent { border-color:#f7931a66; background:linear-gradient(180deg,#f7931a,#ffad52); color:#1a1208; }
+    .stats { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-top:10px; }
+    .stat { border:1px solid var(--border); border-radius:12px; padding:10px 12px; background:#00000018; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+    .ok { color:#28d07f; } .bad { color:#ff6b6b; }
+    .target { overflow:auto; white-space:nowrap; }
+    .help { color:var(--muted); font-size:.9rem; }
+    @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Proof‑of‑Work Mining Simulator</h1>
+    <p class="help">Find a nonce such that doubleSHA256(header) starts with N leading zeros. It’s a simplified header, but a real hash.</p>
+
+    <section id="pow-app" class="grid">
+      <div class="panel">
+        <h2>Block header</h2>
+        <div class="cols">
+          <div>
+            <label>Previous hash (hex)</label>
+            <input id="prevHash" type="text" class="mono" value="0000000000000000000000000000000000000000000000000000000000000000" />
+          </div>
+          <div>
+            <label>Timestamp (ms since epoch)</label>
+            <input id="timestamp" type="text" class="mono" />
+            <div class="row">
+              <input id="autoTs" type="checkbox" checked />
+              <label for="autoTs">Auto-update timestamp</label>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label>Data (free‑form notes)</label>
+          <textarea id="data" class="mono">Daan.Engineer — PoW playground</textarea>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Mining controls</h2>
+        <div class="cols">
+          <div>
+            <label>Difficulty (leading zeros, hex)</label>
+            <input id="difficulty" type="number" min="1" max="7" step="1" value="4" />
+          </div>
+          <div>
+            <label>Threads (web workers)</label>
+            <input id="threads" type="number" min="1" max="8" step="1" value="2" />
+          </div>
+          <div>
+            <label>Start nonce</label>
+            <input id="nonceStart" type="number" min="0" step="1" value="0" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+          <button id="start" class="btn btn--accent">Start</button>
+          <button id="pause" class="btn">Pause</button>
+          <button id="resume" class="btn">Resume</button>
+          <button id="stop" class="btn">Stop</button>
+          <button id="randomize" class="btn">Randomize header</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Live status</h2>
+        <div class="stats">
+          <div class="stat">
+            <div class="help">Hashrate</div>
+            <div id="hashrate" class="mono">0 H/s</div>
+          </div>
+          <div class="stat">
+            <div class="help">Total hashes</div>
+            <div id="total" class="mono">0</div>
+          </div>
+          <div class="stat">
+            <div class="help">Elapsed</div>
+            <div id="elapsed" class="mono">0.0s</div>
+          </div>
+          <div class="stat">
+            <div class="help">Best hash</div>
+            <div id="best" class="mono">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Target & solution</h2>
+        <div class="help">Target (hex): lower is harder. Required: hash < target.</div>
+        <div id="target" class="mono target" style="margin:8px 0;">—</div>
+        <div id="solution" class="mono" style="margin-top:8px;"></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // UI elements
+    const $ = id => document.getElementById(id);
+    const prevHashEl = $('prevHash'), timestampEl = $('timestamp'), autoTsEl = $('autoTs'), dataEl = $('data');
+    const diffEl = $('difficulty'), threadsEl = $('threads'), nonceStartEl = $('nonceStart');
+    const startBtn = $('start'), pauseBtn = $('pause'), resumeBtn = $('resume'), stopBtn = $('stop'), randomBtn = $('randomize');
+    const hashrateEl = $('hashrate'), totalEl = $('total'), elapsedEl = $('elapsed'), bestEl = $('best'), targetEl = $('target'), solutionEl = $('solution');
+
+    // Set initial timestamp
+    const setTs = () => timestampEl.value = String(Date.now());
+    setTs(); let tsTimer = setInterval(() => { if (autoTsEl.checked) setTs(); }, 1000);
+    autoTsEl.addEventListener('change', () => { if (!autoTsEl.checked) clearInterval(tsTimer); else tsTimer = setInterval(() => setTs(), 1000); });
+
+    // Build target from difficulty (leading zeros)
+    function targetFromDifficulty(d) {
+      const zeros = '0'.repeat(d);
+      const fill = 'f'.repeat(64 - d);
+      return zeros + fill;
+    }
+
+    // Worker code (double SHA-256 with Web Crypto)
+    const workerCode = `
+      const enc = new TextEncoder();
+      function hex(buf) {
+        const v = new Uint8Array(buf); const lut = [];
+        for (let i=0;i<256;i++) lut[i] = (i<16?'0':'')+i.toString(16);
+        let s=''; for (let i=0;i<v.length;i++) s += lut[v[i]];
+        return s;
+      }
+      async function dsha256(bytes) {
+        const h1 = await crypto.subtle.digest('SHA-256', bytes);
+        const h2 = await crypto.subtle.digest('SHA-256', h1);
+        return hex(h2);
+      }
+      let running=false, paused=false;
+      let cfg=null, nonce=0, best='ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', total=0, lastReport=performance.now();
+
+      function headerJSON() {
+        // Simplified header: deterministic string
+        return JSON.stringify({prev: cfg.prevHash, ts: cfg.timestamp, data: cfg.data, nonce});
+      }
+
+      function meetsTarget(hash, target) {
+        // Compare by hex order (same length)
+        return hash < target;
+      }
+
+      async function mineLoop() {
+        while (running) {
+          if (paused) { await new Promise(r=>setTimeout(r,50)); continue; }
+          // Batch a few nonces to reduce postMessage overhead
+          for (let i=0;i<50 && running && !paused; i++) {
+            const h = await dsha256(enc.encode(headerJSON()));
+            total++;
+            if (h < best) best = h;
+            if (meetsTarget(h, cfg.target)) {
+              running=false;
+              postMessage({type:'found', hash:h, nonce, header:{prev:cfg.prevHash, ts:cfg.timestamp, data:cfg.data, nonce}});
+              break;
+            }
+            nonce++;
+          }
+          const now = performance.now();
+          if (now - lastReport > 300) {
+            postMessage({type:'progress', total, best, nonce});
+            lastReport = now;
+          }
+        }
+        postMessage({type:'stopped', total, best, nonce});
+      }
+
+      onmessage = async (e) => {
+        const m = e.data;
+        if (m.cmd === 'start') {
+          cfg = m.cfg; nonce = m.nonce; running = true; paused = false; total = 0; best = 'f'.repeat(64);
+          mineLoop();
+        } else if (m.cmd === 'stop') {
+          running = false; paused = false;
+        } else if (m.cmd === 'pause') {
+          paused = true;
+        } else if (m.cmd === 'resume') {
+          paused = false;
+        } else if (m.cmd === 'update') {
+          cfg = m.cfg;
+        }
+      };
+    `;
+
+    function makeWorker() {
+      const blob = new Blob([workerCode], {type: 'application/javascript'});
+      const url = URL.createObjectURL(blob);
+      const w = new Worker(url);
+      w._url = url;
+      return w;
+    }
+
+    let workers = [];
+    let controller = {
+      running:false, startTime:0, total:0, lastTotal:0, lastTime:0, best:'—',
+      cfg:null, found:false
+    };
+
+    function updateTarget() {
+      const t = targetFromDifficulty(Number(diffEl.value));
+      targetEl.textContent = t;
+      return t;
+    }
+    updateTarget();
+    diffEl.addEventListener('input', () => {
+      const t = updateTarget();
+      if (controller.running) broadcast({cmd:'update', cfg: {...controller.cfg, target:t}});
+    });
+
+    randomBtn.addEventListener('click', () => {
+      prevHashEl.value = crypto.getRandomValues(new Uint32Array(8)).reduce((s,n)=>s+('00000000'+n.toString(16)).slice(-8),'').slice(0,64);
+      dataEl.value = 'Note #' + Math.floor(Math.random()*1e6) + ' — keep building.';
+      if (controller.running) stopMining();
+    });
+
+    function fmtNumber(n) { return n.toLocaleString('en-US'); }
+    function fmtHashrate(hps) {
+      if (hps >= 1e6) return (hps/1e6).toFixed(2)+' MH/s';
+      if (hps >= 1e3) return (hps/1e3).toFixed(2)+' kH/s';
+      return Math.max(0,hps|0) + ' H/s';
+    }
+
+    function resetStats() {
+      controller.total = 0; controller.lastTotal = 0; controller.startTime = 0; controller.best='—'; controller.found=false;
+      hashrateEl.textContent = '0 H/s'; totalEl.textContent = '0'; elapsedEl.textContent = '0.0s'; bestEl.textContent = '—';
+      solutionEl.textContent = '';
+    }
+
+    function startMining() {
+      if (controller.running) return;
+      resetStats();
+
+      const cfg = {
+        prevHash: (prevHashEl.value || '').trim().toLowerCase(),
+        timestamp: (timestampEl.value || '').trim(),
+        data: dataEl.value,
+        target: updateTarget()
+      };
+      controller.cfg = cfg;
+      const nonceStart = Number(nonceStartEl.value) || 0;
+
+      const n = Math.min(Math.max(1, Number(threadsEl.value) || 1), 8);
+      workers = Array.from({length:n}, (_,i) => makeWorker());
+      const per = 2**32 / n; // spread nonces roughly
+      workers.forEach((w, i) => {
+        w.onmessage = (ev) => {
+          const msg = ev.data;
+          if (msg.type === 'progress') {
+            controller.total += (msg.total - (w._lastTotal||0));
+            w._lastTotal = msg.total;
+            controller.best = (controller.best === '—' || msg.best < controller.best) ? msg.best : controller.best;
+          } else if (msg.type === 'found') {
+            if (!controller.found) {
+              controller.found = true;
+              solutionEl.innerHTML =
+                '<span class="ok">Found!</span> nonce=' + msg.nonce +
+                ' hash=' + msg.hash +
+                ' header=' + JSON.stringify(msg.header);
+              stopMining();
+            }
+          }
+        };
+        w.postMessage({cmd:'start', cfg, nonce: Math.floor(nonceStart + i*per)});
+      });
+
+      controller.running = true;
+      controller.startTime = performance.now();
+      controller.lastTime = controller.startTime;
+
+      // UI updater
+      tick();
+    }
+
+    function pauseMining() { if (!controller.running) return; workers.forEach(w => w.postMessage({cmd:'pause'})); }
+    function resumeMining() { if (!controller.running) return; workers.forEach(w => w.postMessage({cmd:'resume'})); }
+
+    function stopMining() {
+      if (!workers.length) return;
+      workers.forEach(w => { w.postMessage({cmd:'stop'}); w.terminate(); URL.revokeObjectURL(w._url); });
+      workers = [];
+      controller.running = false;
+    }
+
+    function tick() {
+      if (!controller.startTime) return;
+      const now = performance.now();
+      const dt = (now - controller.lastTime) / 1000;
+      const dh = controller.total - controller.lastTotal;
+      const hps = dh / Math.max(dt, 1e-3);
+      hashrateEl.textContent = fmtHashrate(hps);
+      totalEl.textContent = fmtNumber(controller.total);
+      elapsedEl.textContent = ((now - controller.startTime)/1000).toFixed(1) + 's';
+      bestEl.textContent = controller.best;
+
+      controller.lastTime = now;
+      controller.lastTotal = controller.total;
+
+      if (controller.running) requestAnimationFrame(tick);
+    }
+
+    startBtn.addEventListener('click', startMining);
+    pauseBtn.addEventListener('click', pauseMining);
+    resumeBtn.addEventListener('click', resumeMining);
+    stopBtn.addEventListener('click', stopMining);
+
+    // Note: on HTTP origins, Web Crypto in workers may be limited. If you see errors, serve over HTTPS.
+    // Quick demo defaults:
+    // Difficulty 4–5 works well in browser. Higher difficulties may take a long time.
+  </script>
+</body>
+</html>
