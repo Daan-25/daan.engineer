@@ -264,11 +264,13 @@
     <section class="hero">
       <p>Welcome!</p>
       <div class="ticker" role="status" aria-live="polite">
-        <span class="pill">BTC</span>
-        <span id="eur" class="pill">EUR — …</span>
-        <span id="usd" class="pill">USD — …</span>
-        <span id="chg" class="pill change">24u — …</span>
-      </div>
+    <span class="pill">BTC</span>
+    <span id="eur" class="pill">EUR — …</span>
+    <span id="usd" class="pill">USD — …</span>
+    <span id="chg" class="pill change">24u — …</span>
+    <span class="pill">Genesis Block — <span id="genesis-timer">…</span></span>
+    <span id="ath" class="pill">ATH — …</span>
+  </div>
     </section>
 
     <section class="grid" aria-label="Navigatie">
@@ -431,6 +433,83 @@
         root.setAttribute('data-theme', now);
         localStorage.setItem(PREF_KEY, now);
       });
+    })();
+
+    (function livePrice() {
+      const eurEl = document.getElementById('eur');
+      const usdEl = document.getElementById('usd');
+      const chgEl = document.getElementById('chg');
+
+      async function loadPrice() {
+        try {
+          const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur,usd&include_24hr_change=true', { cache: 'no-store' });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const j = await r.json();
+          const eur = j.bitcoin.eur;
+          const usd = j.bitcoin.usd;
+          const chg = j.bitcoin.usd_24h_change;
+
+          eurEl.textContent = `EUR — €${eur.toLocaleString('nl-NL')}`;
+          usdEl.textContent = `USD — $${usd.toLocaleString('en-US')}`;
+          chgEl.textContent = `24u — ${chg.toFixed(2)}%`;
+          chgEl.style.color = chg >= 0 ? '#3fb950' : '#f85149';
+        } catch (e) {
+          eurEl.textContent = 'EUR — n.v.t.';
+          usdEl.textContent = 'USD — n.v.t.';
+          chgEl.textContent = '24u — n.v.t.';
+        }
+      }
+
+      loadPrice();
+      setInterval(loadPrice, 60000); // elke minuut verversen
+    })();
+
+    // Genesis Block timer
+    (function genesisTimer() {
+      const genesisDate = new Date(Date.UTC(2009, 0, 3, 18, 15, 5));
+      const el = document.getElementById('genesis-timer');
+
+      function update() {
+        const now = new Date();
+        let diff = Math.floor((now - genesisDate) / 1000);
+
+        const years = Math.floor(diff / (365.25 * 24 * 3600));
+        diff -= Math.floor(years * 365.25 * 24 * 3600);
+        const days = Math.floor(diff / (24 * 3600));
+        diff -= days * 24 * 3600;
+        const hours = Math.floor(diff / 3600);
+        diff -= hours * 3600;
+        const minutes = Math.floor(diff / 60);
+        const seconds = diff % 60;
+
+        el.textContent = `${years}y ${days}d ${hours}h ${minutes}m ${seconds}s`;
+      }
+
+      update();
+      setInterval(update, 1000);
+    })();
+
+    // Automatische ATH
+    (function athPrice() {
+      const athEl = document.getElementById('ath');
+
+      async function loadATH() {
+        try {
+          const r = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false', { cache: 'no-store' });
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          const j = await r.json();
+
+          const athUsd = j.market_data.ath.usd;
+          const athDate = new Date(j.market_data.ath_date.usd);
+
+          athEl.textContent = `ATH — $${athUsd.toLocaleString('en-US')} (${athDate.toLocaleDateString('nl-NL')})`;
+          athEl.title = `ATH bereikt op ${athDate.toLocaleString('nl-NL')}`;
+        } catch (e) {
+          athEl.textContent = 'ATH — n.v.t.';
+        }
+      }
+
+      loadATH();
     })();
 
     // Live BTC-prijs (EUR + USD + 24u change)
