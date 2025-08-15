@@ -309,6 +309,12 @@
       </a>
     </section>
 
+    <section>
+      <div class="ticker" role="status" aria-live="polite">
+        <span class="pill">Genesis Block — <span id="genesis-timer">…</span></span>
+      </div>
+    </section>
+
     <section id="whitepaper" class="panel" style="margin-top:40px;">
       <h2>📄 Bitcoin Whitepaper</h2>
       <p>Written by Satoshi Nakamoto in 2008. The foundation of decentralized money.</p>
@@ -455,6 +461,33 @@
       const id = setInterval(load, 60_000);
       // optioneel: opruimen bij SPA, hier niet nodig
     })();
+
+    (function genesisTimer() {
+  // Genesis block tijd in UTC
+  const genesisDate = new Date(Date.UTC(2009, 0, 3, 18, 15, 5));
+  const el = document.getElementById('genesis-timer');
+
+  function update() {
+    const now = new Date();
+    let diff = Math.floor((now - genesisDate) / 1000);
+
+    const years = Math.floor(diff / (365.25 * 24 * 3600));
+    diff -= years * 365.25 * 24 * 3600;
+    const days = Math.floor(diff / (24 * 3600));
+    diff -= days * 24 * 3600;
+    const hours = Math.floor(diff / 3600);
+    diff -= hours * 3600;
+    const minutes = Math.floor(diff / 60);
+    const seconds = diff % 60;
+
+    el.textContent =
+      `${years}y ${days}d ${hours}h ${minutes}m ${seconds}s`;
+  }
+
+  update();
+  setInterval(update, 1000);
+})();
+
 
     // Kopieer knoppen
     (function copyButtons() {
